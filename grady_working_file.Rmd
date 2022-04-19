@@ -10,25 +10,70 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+#knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 ```
 
-## R Markdown
+# Pulling in the NBA R Package
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r}
+#devtools::install_github("abresler/nbastatR")
+Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 2)
 ```
 
-## Including Plots
+# Libraries
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r, libraries}
+library(readr)
+library(tidyverse)     # for data cleaning and plotting
+library(lubridate)     # for date manipulation
+library(openintro)     # for the abbr2state() function
+library(maps)          # for map data
+library(ggmap)         # for mapping points on maps
+library(gplots)        # for col2hex() function
+library(RColorBrewer)  # for color palettes
+library(sf)            # for working with spatial data
+library(leaflet)       # for highly customizable mapping
+library(ggthemes)      # for more themes (including theme_map())
+library(plotly)        # for the ggplotly() - basic interactivity
+library(gganimate)     # for adding animation layers to ggplots
+library(gifski)        # for creating the gif (don't need to load this library every time,but need it installed)
+library(transformr)    # for "tweening" (gganimate)
+library(shiny)         # for creating interactive apps
+library(patchwork)     # for nicely combining ggplot2 graphs  
+library(gt)            # for creating nice tables
+library(rvest)         # for scraping data
+library(robotstxt)     # for checking if you can scrape data
+library(janitor)
+library(reshape2)
+library(devtools)
+library(nbastatR)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+# Example code for the Sports Reference Data
+
+```{r}
+paths_allowed(paths = "https://www.basketball-reference.com/teams/BOS/stats_per_game_totals.html")
+
+celtics_web <- read_html("https://www.basketball-reference.com/teams/BOS/stats_per_game_totals.html")
+
+celtics <- celtics_web %>% 
+  html_element("#stats") %>% 
+  html_table()
+
+celtics <- celtics %>% 
+  clean_names() %>% 
+  discard(~all(is.na(.) | . =="")) %>% 
+  filter(season != "Season")
+
+celtics_melted <- celtics %>%
+  melt(id.vars='season') %>% 
+  filter(variable == "w" | variable == "l")
+```
+
+# Playing with NBA Data
+
+```{r}
+rosters_2001_2003 <- teams_rosters(seasons = 2001:2003)
+```
+
+
