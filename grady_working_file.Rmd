@@ -17,7 +17,7 @@ output:
 
 ```{r}
 #devtools::install_github("abresler/nbastatR")
-Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 2)
+#Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 2)
 ```
 
 # Libraries
@@ -49,7 +49,7 @@ library(devtools)
 library(nbastatR)
 ```
 
-# Example code for the Sports Reference Data
+# Sports Reference Data
 
 ```{r}
 paths_allowed(paths = "https://www.basketball-reference.com/teams/BOS/stats_per_game_totals.html")
@@ -68,12 +68,52 @@ celtics <- celtics %>%
 celtics_melted <- celtics %>%
   melt(id.vars='season') %>% 
   filter(variable == "w" | variable == "l")
+
 ```
+
+```{r}
+curry_web <- read_html("https://www.basketball-reference.com/players/c/curryst01.html")
+warriors_web <- read_html("https://www.basketball-reference.com/teams/GSW/stats_basic_totals.html")
+
+curry_career_regular_season <- curry_web %>% 
+  html_element("#per_game") %>% 
+  html_table()
+
+curry_career_playoffs <- curry_web %>% 
+  html_element("#div_playoffs_per_game") %>% 
+  html_table()
+
+warriors_historical_stats <- warriors_web %>% 
+  html_element("#div_stats") %>% 
+  html_table()
+
+warriors_historical_stats <- warriors_historical_stats %>% 
+  clean_names() %>% 
+  discard(~all(is.na(.) | . =="")) %>% 
+  filter(season != "Season")
+```
+
+
 
 # Playing with NBA Data
 
 ```{r}
-rosters_2001_2003 <- teams_rosters(seasons = 2001:2003)
+#rosters_2001_2003 <- teams_rosters(seasons = 2001:2003)
 ```
 
+```{r}
+#gamedata <- game_logs(seasons = 2020)
+
+#curry_2020 <- gamedata %>% 
+  #filter(namePlayer == "Stephen Curry")
+```
+
+```{r}
+#assign_nba_players()
+
+#assign_nba_teams()
+
+#curry_stats <- df_dict_nba_players %>% 
+  #filter(namePlayer == "Stephen Curry")
+```
 
