@@ -1,24 +1,7 @@
 ---
-title: "Grady's Working File"
-author: Grady Munro
-output: 
-  html_document:
-    toc: true
-    toc_float: true
-    df_print: paged
-    code_download: true
+title: "Importing Data"
+output: html_document
 ---
-
-```{r setup, include=FALSE}
-#knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
-```
-
-# Pulling in the NBA R Package
-
-```{r}
-#devtools::install_github("abresler/nbastatR")
-#Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 2)
-```
 
 # Libraries
 
@@ -45,31 +28,9 @@ library(rvest)         # for scraping data
 library(robotstxt)     # for checking if you can scrape data
 library(janitor)
 library(reshape2)
-library(devtools)
-library(nbastatR)
 ```
 
-# Sports Reference Data
-
-```{r}
-paths_allowed(paths = "https://www.basketball-reference.com/teams/BOS/stats_per_game_totals.html")
-
-celtics_web <- read_html("https://www.basketball-reference.com/teams/BOS/stats_per_game_totals.html")
-
-celtics <- celtics_web %>% 
-  html_element("#stats") %>% 
-  html_table()
-
-celtics <- celtics %>% 
-  clean_names() %>% 
-  discard(~all(is.na(.) | . =="")) %>% 
-  filter(season != "Season")
-
-celtics_melted <- celtics %>%
-  melt(id.vars='season') %>% 
-  filter(variable == "w" | variable == "l")
-
-```
+# Code for importing the Stephen Curry and Warriors Data
 
 ```{r}
 curry_web <- read_html("https://www.basketball-reference.com/players/c/curryst01.html")
@@ -93,33 +54,5 @@ warriors_historical_stats <- warriors_historical_stats %>%
   clean_names() %>% 
   discard(~all(is.na(.) | . =="")) %>% #for if there are blank columns
   filter(season != "Season") #discard the rows where it just has the names
-
-curry_salaries <- curry_web_2 %>% 
-  html_element("#div_all_salaries") %>% 
-  html_table() 
-```
-
-
-
-# Playing with NBA Data
-
-```{r}
-#rosters_2001_2003 <- teams_rosters(seasons = 2001:2003)
-```
-
-```{r}
-#gamedata <- game_logs(seasons = 2020)
-
-#curry_2020 <- gamedata %>% 
-  #filter(namePlayer == "Stephen Curry")
-```
-
-```{r}
-#assign_nba_players()
-
-#assign_nba_teams()
-
-#curry_stats <- df_dict_nba_players %>% 
-  #filter(namePlayer == "Stephen Curry")
 ```
 
