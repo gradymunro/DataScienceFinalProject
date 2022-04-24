@@ -41,12 +41,14 @@ league_web <- read_html("https://www.basketball-reference.com/leagues/NBA_stats_
 curry_career_regular_season_per_game <- curry_web %>% 
   html_element("#per_game") %>% 
   html_table() %>% 
-  clean_names()
+  clean_names() %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) #Use season_start_year if you want to calculate
 
 curry_career_playoffs_per_game <- curry_web %>% 
   html_element("#div_playoffs_per_game") %>% 
   html_table() %>% 
-  clean_names()
+  clean_names() %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4)))
 
 warriors_per_game_stats <- warriors_web %>% 
   html_element("#stats") %>% 
@@ -54,7 +56,8 @@ warriors_per_game_stats <- warriors_web %>%
   clean_names() %>% 
   discard(~all(is.na(.) | . =="")) %>% #for if there are blank columns
   filter(season != "Season") %>% #discard the rows where it just has the names
-  retype()
+  retype() %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4)))
 
 league_avg_per_game_stats <- league_web %>% 
   html_element("#stats") %>% 
@@ -63,6 +66,7 @@ league_avg_per_game_stats <- league_web %>%
   clean_names() %>% 
   discard(~all(is.na(.) | . =="")) %>% #for if there are blank columns
   filter(season != "Season" & season != "") %>%  #discard the rows where it just has the names
-  retype()
+  retype() %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4)))
 ```
 
