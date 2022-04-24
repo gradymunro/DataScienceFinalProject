@@ -28,6 +28,7 @@ library(rvest)         # for scraping data
 library(robotstxt)     # for checking if you can scrape data
 library(janitor)
 library(reshape2)
+library(hablar) # Might need to install the hablar package, this gives you the retype function.
 ```
 
 # Code for importing the Stephen Curry, Warriors, and League Average Data
@@ -52,14 +53,16 @@ warriors_per_game_stats <- warriors_web %>%
   html_table() %>% 
   clean_names() %>% 
   discard(~all(is.na(.) | . =="")) %>% #for if there are blank columns
-  filter(season != "Season") #discard the rows where it just has the names
+  filter(season != "Season") %>% #discard the rows where it just has the names
+  retype()
 
 league_avg_per_game_stats <- league_web %>% 
   html_element("#stats") %>% 
   html_table %>% 
-  row_to_names(row_number = 1) %>% 
+  row_to_names(row_number = 1) %>%  
   clean_names() %>% 
   discard(~all(is.na(.) | . =="")) %>% #for if there are blank columns
-  filter(season != "Season" & season != "") #discard the rows where it just has the names
+  filter(season != "Season" & season != "") %>%  #discard the rows where it just has the names
+  retype()
 ```
 
