@@ -7,6 +7,7 @@ output:
     toc_float: true
     df_print: paged
     code_download: true
+    theme: cerulean
 ---
 
 ```{r setup, include=FALSE}
@@ -137,8 +138,29 @@ league_avg_per_game_stats <- league_web %>%
 
 ```{r}
 league_avg_per_game_stats %>% 
-  mutate(season_start_year = as.integer(substr(season, 1, 4)))
-  
+  mutate(curry_in_league = if_else(season_start_year >= 2009, TRUE, FALSE)) %>% 
+  filter(season_start_year < 2021 & season_start_year >= 1979) %>% 
+  ggplot() +
+  geom_col(aes(x = season,
+               y = x3pa,
+               fill = curry_in_league)) +
+  geom_vline(xintercept = 30.5,
+             linetype = "dashed") +
+  annotate("text",
+           x = 28,
+           y = 33,
+           size = 3,
+           label = "Stephen Curry \nDrafted in \n2009",
+           fontface = 3) +
+  labs(title = "League Average of 3-Point Shot Attempts per Game",
+       x = "",
+       y = "Attempts per Game") +
+  scale_fill_manual(values=c("#17408B", "#C9082A")) +
+  theme_tufte() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 90, 
+                                   vjust = 0.5, 
+                                   hjust=1))
 ```
 
 
