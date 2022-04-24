@@ -187,7 +187,7 @@ three_player_career_playoffs_per_game <- rbind(curry_career_playoffs_per_game,
 ```{r}
 league_avg_per_game_stats %>% 
   mutate(curry_in_league = if_else(season_start_year >= 2009, TRUE, FALSE)) %>% 
-  filter(season_start_year < 2021 & season_start_year >= 1979) %>% 
+  filter(season_start_year >= 1979) %>% 
   ggplot() +
   geom_col(aes(x = season,
                y = x3pa,
@@ -200,7 +200,7 @@ league_avg_per_game_stats %>%
            size = 3,
            label = "Stephen Curry \nDrafted in \n2009",
            fontface = 3) +
-  labs(title = "League Average of 3-Point Shot Attempts per Game",
+  labs(title = "League Average of 3-Point Field Goal Attempts per Game",
        x = "",
        y = "Attempts per Game") +
   scale_fill_manual(values=c("#17408B", "#C9082A")) +
@@ -211,6 +211,42 @@ league_avg_per_game_stats %>%
                                    hjust=1))
 ```
 
+# Curry, Jordan, and Lebron Comparison
 
-
+```{r}
+three_player_career_regular_season_per_game %>% 
+  drop_na(season_start_year) %>% 
+  ggplot(aes(x = season_start_year,
+             y = x3p_percent,
+             colour = player)) +
+  geom_line() +
+  geom_smooth(se = FALSE) +
+  annotate("text",
+           x = 1992,
+           y = 0.25,
+           label = "Michael Jordan",
+           size = 3,
+           colour = "#CE1141",
+           fontface = 4) +
+  annotate("text",
+           x = 2006,
+           y = 0.3,
+           label = "Lebron James",
+           size = 3,
+           colour = "#FDBB30",
+           fontface = 4) +
+  annotate("text",
+           x = 2009,
+           y = 0.42,
+           label = "Stephen Curry",
+           size = 3,
+           colour = "#1D428A",
+           fontface = 4) +
+  labs(title = "Average Per Game 3-Point Field Goal Pecentage over Player's Career",
+       y = "3-Point Percentage",
+       x = "") +
+  scale_color_manual(values=c("#FDBB30", "#CE1141", "#1D428A")) + #(Lebron, Jordan, Curry)
+  theme_tufte() +
+  theme(legend.position = "none")
+```
 
