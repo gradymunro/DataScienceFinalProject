@@ -30,11 +30,12 @@ library(janitor)
 library(reshape2)
 ```
 
-# Code for importing the Stephen Curry and Warriors Data
+# Code for importing the Stephen Curry, Warriors, and League Average Data
 
 ```{r}
 curry_web <- read_html("https://www.basketball-reference.com/players/c/curryst01.html")
-warriors_web <- read_html("https://www.basketball-reference.com/teams/GSW/stats_basic_totals.html")
+warriors_web <- read_html("https://www.basketball-reference.com/teams/GSW/stats_per_game_totals.html")
+league_web <- read_html("https://www.basketball-reference.com/leagues/NBA_stats_per_game.html")
 
 curry_career_regular_season_per_game <- curry_web %>% 
   html_element("#per_game") %>% 
@@ -46,13 +47,19 @@ curry_career_playoffs_per_game <- curry_web %>%
   html_table() %>% 
   clean_names()
 
-warriors_historical_stats <- warriors_web %>% 
-  html_element("#div_stats") %>% 
-  html_table()
-
-warriors_historical_stats <- warriors_historical_stats %>% 
+warriors_per_game_stats <- warriors_web %>% 
+  html_element("#stats") %>% 
+  html_table() %>% 
   clean_names() %>% 
   discard(~all(is.na(.) | . =="")) %>% #for if there are blank columns
   filter(season != "Season") #discard the rows where it just has the names
+
+league_avg_per_game_stats <- league_web %>% 
+  html_element("#stats") %>% 
+  html_table %>% 
+  row_to_names(row_number = 1) %>% 
+  clean_names() %>% 
+  discard(~all(is.na(.) | . =="")) %>% #for if there are blank columns
+  filter(season != "Season" & season != "") #discard the rows where it just has the names
 ```
 
