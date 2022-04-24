@@ -77,18 +77,22 @@ celtics_melted <- celtics %>%
 curry_web <- read_html("https://www.basketball-reference.com/players/c/curryst01.html")
 warriors_web <- read_html("https://www.basketball-reference.com/teams/GSW/stats_per_game_totals.html")
 league_web <- read_html("https://www.basketball-reference.com/leagues/NBA_stats_per_game.html")
+lebron_web <- read_html("https://www.basketball-reference.com/players/j/jamesle01.html")
+jordan_web <- read_html("https://www.basketball-reference.com/players/j/jordami01.html")
 
 curry_career_regular_season_per_game <- curry_web %>% 
   html_element("#per_game") %>% 
   html_table() %>% 
   clean_names() %>% 
-  mutate(season_start_year = as.integer(substr(season, 1, 4))) #Use season_start_year if you want to calculate
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>%
+  mutate(player = "Stephen Curry")
 
 curry_career_playoffs_per_game <- curry_web %>% 
   html_element("#div_playoffs_per_game") %>% 
   html_table() %>% 
   clean_names() %>% 
-  mutate(season_start_year = as.integer(substr(season, 1, 4)))
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>% 
+  mutate(player = "Stephen Curry")
 
 warriors_per_game_stats <- warriors_web %>% 
   html_element("#stats") %>% 
@@ -108,6 +112,50 @@ league_avg_per_game_stats <- league_web %>%
   filter(season != "Season" & season != "") %>%  #discard the rows where it just has the names
   retype() %>% 
   mutate(season_start_year = as.integer(substr(season, 1, 4)))
+
+lebron_career_regular_season_per_game <- lebron_web %>% 
+  html_element("#per_game") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  filter(season != "") %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>%
+  mutate(player = "Lebron James") %>% 
+  retype()
+
+lebron_career_playoffs_per_game <- lebron_web %>% 
+  html_element("#div_playoffs_per_game") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  filter(season != "") %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>% 
+  mutate(player = "Lebron James") %>% 
+  retype()
+
+jordan_career_regular_season_per_game <- jordan_web %>% 
+  html_element("#per_game") %>% 
+  html_table() %>% 
+  clean_names() %>%
+  filter(lg == "NBA") %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>%
+  mutate(player = "Michael Jordan") %>% 
+  retype()
+
+jordan_career_playoffs_per_game <- jordan_web %>% 
+  html_element("#div_playoffs_per_game") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  filter(season != "") %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>% 
+  mutate(player = "Michael Jordan") %>% 
+  retype()
+
+three_player_career_regular_season_per_game <- rbind(curry_career_regular_season_per_game,
+                                                     lebron_career_regular_season_per_game,
+                                                     jordan_career_regular_season_per_game)
+
+three_player_career_playoffs_per_game <- rbind(curry_career_playoffs_per_game,
+                                               lebron_career_playoffs_per_game,
+                                               jordan_career_playoffs_per_game)
 ```
 
 
