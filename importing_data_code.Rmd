@@ -31,7 +31,7 @@ library(reshape2)
 library(hablar) # Might need to install the hablar package, this gives you the retype function.
 ```
 
-# Code for importing the Stephen Curry, Warriors, and League Average Data
+# Code for importing the Stephen Curry, Lebron James, Michael Jordan, Warriors, and League Average Data
 
 ```{r}
 curry_web <- read_html("https://www.basketball-reference.com/players/c/curryst01.html")
@@ -116,5 +116,37 @@ three_player_career_regular_season_per_game <- rbind(curry_career_regular_season
 three_player_career_playoffs_per_game <- rbind(curry_career_playoffs_per_game,
                                                lebron_career_playoffs_per_game,
                                                jordan_career_playoffs_per_game)
+
+curry_career_regular_season_totals <- curry_web %>% 
+  html_element("#totals") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  discard(~all(is.na(.) | . =="")) %>%
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>%
+  mutate(player = "Stephen Curry")
+
+lebron_career_regular_season_totals <- lebron_web %>% 
+  html_element("#totals") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  discard(~all(is.na(.) | . =="")) %>%
+  filter(season != "") %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>%
+  mutate(player = "Lebron James") %>% 
+  retype()
+
+jordan_career_regular_season_totals <- jordan_web %>% 
+  html_element("#totals") %>% 
+  html_table() %>% 
+  clean_names() %>%
+  discard(~all(is.na(.) | . =="")) %>%
+  filter(lg == "NBA") %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>%
+  mutate(player = "Michael Jordan") %>% 
+  retype()
+
+three_player_career_regular_season_totals <- rbind(curry_career_regular_season_totals,
+                                                     lebron_career_regular_season_totals,
+                                                     jordan_career_regular_season_totals)
 ```
 

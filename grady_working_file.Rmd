@@ -156,6 +156,38 @@ three_player_career_regular_season_per_game <- rbind(curry_career_regular_season
 three_player_career_playoffs_per_game <- rbind(curry_career_playoffs_per_game,
                                                lebron_career_playoffs_per_game,
                                                jordan_career_playoffs_per_game)
+
+curry_career_regular_season_totals <- curry_web %>% 
+  html_element("#totals") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  discard(~all(is.na(.) | . =="")) %>%
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>%
+  mutate(player = "Stephen Curry")
+
+lebron_career_regular_season_totals <- lebron_web %>% 
+  html_element("#totals") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  discard(~all(is.na(.) | . =="")) %>%
+  filter(season != "") %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>%
+  mutate(player = "Lebron James") %>% 
+  retype()
+
+jordan_career_regular_season_totals <- jordan_web %>% 
+  html_element("#totals") %>% 
+  html_table() %>% 
+  clean_names() %>%
+  discard(~all(is.na(.) | . =="")) %>%
+  filter(lg == "NBA") %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>%
+  mutate(player = "Michael Jordan") %>% 
+  retype()
+
+three_player_career_regular_season_totals <- rbind(curry_career_regular_season_totals,
+                                                     lebron_career_regular_season_totals,
+                                                     jordan_career_regular_season_totals)
 ```
 
 
@@ -200,7 +232,7 @@ league_avg_per_game_stats %>%
            size = 3,
            label = "Stephen Curry \nDrafted in \n2009",
            fontface = 3) +
-  labs(title = "League Average of 3-Point Field Goal Attempts per Game",
+  labs(title = "League Average of 3-Point Attempts per Game",
        x = "",
        y = "Attempts per Game") +
   scale_fill_manual(values=c("#17408B", "#C9082A")) +
@@ -219,34 +251,106 @@ three_player_career_regular_season_per_game %>%
   ggplot(aes(x = season_start_year,
              y = x3p_percent,
              colour = player)) +
-  geom_line() +
   geom_smooth(se = FALSE) +
   annotate("text",
-           x = 1992,
-           y = 0.25,
+           x = 1987,
+           y = 0.15,
            label = "Michael Jordan",
            size = 3,
            colour = "#CE1141",
            fontface = 4) +
   annotate("text",
-           x = 2006,
-           y = 0.3,
+           x = 2004,
+           y = 0.305,
            label = "Lebron James",
            size = 3,
            colour = "#FDBB30",
            fontface = 4) +
   annotate("text",
-           x = 2009,
-           y = 0.42,
+           x = 2007,
+           y = 0.43,
            label = "Stephen Curry",
            size = 3,
            colour = "#1D428A",
            fontface = 4) +
-  labs(title = "Average Per Game 3-Point Field Goal Pecentage over Player's Career",
+  labs(title = "Average Per Game 3-Point Pecentage per Season",
        y = "3-Point Percentage",
        x = "") +
   scale_color_manual(values=c("#FDBB30", "#CE1141", "#1D428A")) + #(Lebron, Jordan, Curry)
   theme_tufte() +
   theme(legend.position = "none")
 ```
+
+```{r}
+three_player_career_regular_season_totals %>% 
+  drop_na(season_start_year) %>% 
+  ggplot(aes(x = season_start_year,
+             y = x3p,
+             colour = player)) +
+  geom_smooth(se = FALSE) +
+  annotate("text",
+           x = 1988,
+           y = 0,
+           label = "Michael Jordan",
+           size = 3,
+           colour = "#CE1141",
+           fontface = 4) +
+  annotate("text",
+           x = 2004,
+           y = 73,
+           label = "Lebron James",
+           size = 3,
+           colour = "#FDBB30",
+           fontface = 4) +
+  annotate("text",
+           x = 2007,
+           y = 160,
+           label = "Stephen Curry",
+           size = 3,
+           colour = "#1D428A",
+           fontface = 4) +
+  labs(title = "3-Point Field Goals Made per Season",
+       y = "",
+       x = "") +
+  scale_color_manual(values=c("#FDBB30", "#CE1141", "#1D428A")) + #(Lebron, Jordan, Curry)
+  theme_tufte() +
+  theme(legend.position = "none")
+```
+
+```{r}
+three_player_career_regular_season_per_game %>% 
+  drop_na(season_start_year) %>% 
+  ggplot(aes(x = season_start_year,
+             y = pts,
+             colour = player)) +
+  geom_smooth(se = FALSE) +
+  annotate("text",
+           x = 1986,
+           y = 25.5,
+           label = "Michael Jordan",
+           size = 3,
+           colour = "#CE1141",
+           fontface = 4) +
+  annotate("text",
+           x = 2004,
+           y = 23,
+           label = "Lebron James",
+           size = 3,
+           colour = "#FDBB30",
+           fontface = 4) +
+  annotate("text",
+           x = 2006,
+           y = 17,
+           label = "Stephen Curry",
+           size = 3,
+           colour = "#1D428A",
+           fontface = 4) +
+  labs(title = "Average per Game Points, per Season",
+       y = "Points",
+       x = "") +
+  scale_color_manual(values=c("#FDBB30", "#CE1141", "#1D428A")) + #(Lebron, Jordan, Curry)
+  theme_tufte() +
+  theme(legend.position = "none")
+```
+
 
