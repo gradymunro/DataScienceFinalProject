@@ -49,6 +49,7 @@ library(reshape2)
 #library(devtools)
 #library(nbastatR)
 library(hablar)
+library(zoo)
 ```
 
 # Sports Reference Data
@@ -79,6 +80,7 @@ warriors_web <- read_html("https://www.basketball-reference.com/teams/GSW/stats_
 league_web <- read_html("https://www.basketball-reference.com/leagues/NBA_stats_per_game.html")
 lebron_web <- read_html("https://www.basketball-reference.com/players/j/jamesle01.html")
 jordan_web <- read_html("https://www.basketball-reference.com/players/j/jordami01.html")
+three_point_career_web <- read_html("https://www.basketball-reference.com/leaders/fg3_career.html")
 
 curry_career_regular_season_per_game <- curry_web %>% 
   html_element("#per_game") %>% 
@@ -188,6 +190,14 @@ jordan_career_regular_season_totals <- jordan_web %>%
 three_player_career_regular_season_totals <- rbind(curry_career_regular_season_totals,
                                                      lebron_career_regular_season_totals,
                                                      jordan_career_regular_season_totals)
+
+
+three_point_career_leaders <- three_point_career_web %>% 
+  html_element("#nba") %>% 
+  html_table %>%  
+  clean_names() 
+  
+three_point_career_leaders <- na.locf(three_point_career_leaders)
 ```
 
 
@@ -232,7 +242,7 @@ league_avg_per_game_stats %>%
            size = 3,
            label = "Stephen Curry \nDrafted in \n2009",
            fontface = 3) +
-  labs(title = "League Average of 3-Point Attempts per Game",
+  labs(title = "League Average of 3-Pt Attempts per Game",
        x = "",
        y = "Attempts per Game") +
   scale_fill_manual(values=c("#17408B", "#C9082A")) +
@@ -273,8 +283,8 @@ three_player_career_regular_season_per_game %>%
            size = 3,
            colour = "#1D428A",
            fontface = 4) +
-  labs(title = "Average Per Game 3-Point Pecentage per Season",
-       y = "3-Point Percentage",
+  labs(title = "Average Per Game 3-Pt Pecentage per Season",
+       y = "3-Pt Percentage",
        x = "") +
   scale_color_manual(values=c("#FDBB30", "#CE1141", "#1D428A")) + #(Lebron, Jordan, Curry)
   theme_tufte() +
@@ -309,7 +319,7 @@ three_player_career_regular_season_totals %>%
            size = 3,
            colour = "#1D428A",
            fontface = 4) +
-  labs(title = "3-Point Field Goals Made per Season",
+  labs(title = "3-Pt Field Goals Made per Season",
        y = "",
        x = "") +
   scale_color_manual(values=c("#FDBB30", "#CE1141", "#1D428A")) + #(Lebron, Jordan, Curry)
@@ -353,4 +363,22 @@ three_player_career_regular_season_per_game %>%
   theme(legend.position = "none")
 ```
 
+# All-Time Leaders in 3-Pointers
+
+```{r}
+three_point_career_leaders %>% 
+  filter(rank <= 10) %>% 
+  mutate(player = str_remove(player, "[*]")) %>% 
+  ggplot(aes(x = x3p,
+             y = fct_reorder(player, rank, .desc = TRUE),
+             label = x3p)) +
+  geom_col() +
+  geom_text(hjust = 1.2,
+            fontface = 3,
+            size = 3) +
+  labs(title = "Top 10 Career Leaders for 3-Pt Field Goals",
+       x = "",
+       y = "") +
+  theme_tufte()
+```
 

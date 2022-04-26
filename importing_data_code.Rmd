@@ -29,6 +29,7 @@ library(robotstxt)     # for checking if you can scrape data
 library(janitor)
 library(reshape2)
 library(hablar) # Might need to install the hablar package, this gives you the retype function.
+library(zoo)
 ```
 
 # Code for importing the Stephen Curry, Lebron James, Michael Jordan, Warriors, and League Average Data
@@ -39,6 +40,7 @@ warriors_web <- read_html("https://www.basketball-reference.com/teams/GSW/stats_
 league_web <- read_html("https://www.basketball-reference.com/leagues/NBA_stats_per_game.html")
 lebron_web <- read_html("https://www.basketball-reference.com/players/j/jamesle01.html")
 jordan_web <- read_html("https://www.basketball-reference.com/players/j/jordami01.html")
+three_point_career_web <- read_html("https://www.basketball-reference.com/leaders/fg3_career.html")
 
 curry_career_regular_season_per_game <- curry_web %>% 
   html_element("#per_game") %>% 
@@ -148,5 +150,13 @@ jordan_career_regular_season_totals <- jordan_web %>%
 three_player_career_regular_season_totals <- rbind(curry_career_regular_season_totals,
                                                      lebron_career_regular_season_totals,
                                                      jordan_career_regular_season_totals)
+
+
+three_point_career_leaders <- three_point_career_web %>% 
+  html_element("#nba") %>% 
+  html_table %>%  
+  clean_names() 
+  
+three_point_career_leaders <- na.locf(three_point_career_leaders)
 ```
 
