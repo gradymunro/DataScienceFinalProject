@@ -195,7 +195,8 @@ three_player_career_regular_season_totals <- rbind(curry_career_regular_season_t
 three_point_career_leaders <- three_point_career_web %>% 
   html_element("#nba") %>% 
   html_table %>%  
-  clean_names() 
+  clean_names() %>% 
+  mutate(player = str_remove(player, "[*]"))
   
 three_point_career_leaders <- na.locf(three_point_career_leaders)
 ```
@@ -367,11 +368,11 @@ three_player_career_regular_season_per_game %>%
 
 ```{r}
 three_point_career_leaders %>% 
-  filter(rank <= 10) %>% 
-  mutate(player = str_remove(player, "[*]")) %>% 
+  filter(rank <= 10) %>%
   ggplot(aes(x = x3p,
              y = fct_reorder(player, rank, .desc = TRUE),
-             label = x3p)) +
+             label = x3p,
+             fill = player)) +
   geom_col() +
   geom_text(hjust = 1.2,
             fontface = 3,
@@ -379,6 +380,17 @@ three_point_career_leaders %>%
   labs(title = "Top 10 Career Leaders for 3-Pt Field Goals",
        x = "",
        y = "") +
-  theme_tufte()
+  scale_fill_manual(values = c("#E03A3E", 
+                               "#F58426", 
+                               "#CE1141", 
+                               "#00538C", 
+                               "#E03A3E", 
+                               "#007A33", 
+                               "#007A33", 
+                               "#FDBB30", 
+                               "#1D428A", 
+                               "#753BBD")) +
+  theme_tufte() +
+  theme(legend.position = "none")
 ```
 
