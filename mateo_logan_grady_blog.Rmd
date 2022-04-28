@@ -11,25 +11,165 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+#knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r, libraries}
+library(readr)
+library(tidyverse)     # for data cleaning and plotting
+library(lubridate)     # for date manipulation
+library(openintro)     # for the abbr2state() function
+library(maps)          # for map data
+library(ggmap)         # for mapping points on maps
+library(gplots)        # for col2hex() function
+library(RColorBrewer)  # for color palettes
+library(sf)            # for working with spatial data
+library(leaflet)       # for highly customizable mapping
+library(ggthemes)      # for more themes (including theme_map())
+library(plotly)        # for the ggplotly() - basic interactivity
+library(gganimate)     # for adding animation layers to ggplots
+library(gifski)        # for creating the gif (don't need to load this library every time,but need it installed)
+library(transformr)    # for "tweening" (gganimate)
+library(shiny)         # for creating interactive apps
+library(patchwork)     # for nicely combining ggplot2 graphs  
+library(gt)            # for creating nice tables
+library(rvest)         # for scraping data
+library(robotstxt)     # for checking if you can scrape data
+library(janitor)
+library(reshape2)
+library(hablar) # Might need to install the hablar package, this gives you the retype function.
+library(zoo)
 ```
 
-## Including Plots
+```{r, reading in data}
+curry_web <- read_html("https://www.basketball-reference.com/players/c/curryst01.html")
+warriors_web <- read_html("https://www.basketball-reference.com/teams/GSW/stats_per_game_totals.html")
+league_web <- read_html("https://www.basketball-reference.com/leagues/NBA_stats_per_game.html")
+lebron_web <- read_html("https://www.basketball-reference.com/players/j/jamesle01.html")
+jordan_web <- read_html("https://www.basketball-reference.com/players/j/jordami01.html")
+three_point_career_web <- read_html("https://www.basketball-reference.com/leaders/fg3_career.html")
 
-You can also embed plots, for example:
+curry_career_regular_season_per_game <- curry_web %>% 
+  html_element("#per_game") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>%
+  mutate(player = "Stephen Curry")
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+curry_career_playoffs_per_game <- curry_web %>% 
+  html_element("#div_playoffs_per_game") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>% 
+  mutate(player = "Stephen Curry")
+
+warriors_per_game_stats <- warriors_web %>% 
+  html_element("#stats") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  discard(~all(is.na(.) | . =="")) %>% #for if there are blank columns
+  filter(season != "Season") %>% #discard the rows where it just has the names
+  retype() %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4)))
+
+league_avg_per_game_stats <- league_web %>% 
+  html_element("#stats") %>% 
+  html_table %>% 
+  row_to_names(row_number = 1) %>%  
+  clean_names() %>% 
+  discard(~all(is.na(.) | . =="")) %>% #for if there are blank columns
+  filter(season != "Season" & season != "") %>%  #discard the rows where it just has the names
+  retype() %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4)))
+
+lebron_career_regular_season_per_game <- lebron_web %>% 
+  html_element("#per_game") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  filter(season != "") %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>%
+  mutate(player = "Lebron James") %>% 
+  retype()
+
+lebron_career_playoffs_per_game <- lebron_web %>% 
+  html_element("#div_playoffs_per_game") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  filter(season != "") %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>% 
+  mutate(player = "Lebron James") %>% 
+  retype()
+
+jordan_career_regular_season_per_game <- jordan_web %>% 
+  html_element("#per_game") %>% 
+  html_table() %>% 
+  clean_names() %>%
+  filter(lg == "NBA") %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>%
+  mutate(player = "Michael Jordan") %>% 
+  retype()
+
+jordan_career_playoffs_per_game <- jordan_web %>% 
+  html_element("#div_playoffs_per_game") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  filter(season != "") %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>% 
+  mutate(player = "Michael Jordan") %>% 
+  retype()
+
+three_player_career_regular_season_per_game <- rbind(curry_career_regular_season_per_game,
+                                                     lebron_career_regular_season_per_game,
+                                                     jordan_career_regular_season_per_game)
+
+three_player_career_playoffs_per_game <- rbind(curry_career_playoffs_per_game,
+                                               lebron_career_playoffs_per_game,
+                                               jordan_career_playoffs_per_game)
+
+curry_career_regular_season_totals <- curry_web %>% 
+  html_element("#totals") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  discard(~all(is.na(.) | . =="")) %>%
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>%
+  mutate(player = "Stephen Curry")
+
+lebron_career_regular_season_totals <- lebron_web %>% 
+  html_element("#totals") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  discard(~all(is.na(.) | . =="")) %>%
+  filter(season != "") %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>%
+  mutate(player = "Lebron James") %>% 
+  retype()
+
+jordan_career_regular_season_totals <- jordan_web %>% 
+  html_element("#totals") %>% 
+  html_table() %>% 
+  clean_names() %>%
+  discard(~all(is.na(.) | . =="")) %>%
+  filter(lg == "NBA") %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>%
+  mutate(player = "Michael Jordan") %>% 
+  retype()
+
+three_player_career_regular_season_totals <- rbind(curry_career_regular_season_totals,
+                                                     lebron_career_regular_season_totals,
+                                                     jordan_career_regular_season_totals)
+
+
+three_point_career_leaders <- three_point_career_web %>% 
+  html_element("#nba") %>% 
+  html_table %>%  
+  clean_names() 
+  
+three_point_career_leaders <- na.locf(three_point_career_leaders)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+  We knew that we wanted to do our final project regarding sports. Eventually, we narrowed it down to basketball and, more specifically, we are going to follow Steph Curry’s career and his effect on the league. By looking at the year in which he got drafted in comparison to the league as well as his team’s statistics before and after his draft, we can begin to draw conclusion in regards to his impact. Additionally, we will compare his game statistics to other NBA legends and three point specialists. Through this context, we began to ask ourselves a set of research questions to guide our data collection, wrangling, and visualization.
+  To begin with, the overarching question we are asking ourselves is: how did Stephen Curry change the game of basketball in the NBA from his draft in 2009? We will look at three point statistics to dive into this one even more. Additionally, we are asking how did the game during another great’s time, like Michael Jordan, differentiate from the modern game. By looking at their differences in statistics we will be able to come to different conclusions regarding the style of play and the intricacies of what skills the coaches and players are hoping to perfect to be competitive in the league. Finally, we will also compre Lebron James, Michael Jordan and Steph Curry to measure which one was more productive.
+
+# Our Data
+
+  In terms of data collection, we relied on a website called [Basketball Reference](https://www.basketball-reference.com/) which provides in depth statistics about individual players and all the teams in the league. We focused on Steph Curry, the Warriors, and the overall league data when we were looking at the data to make sure that we had enough points to answer our research questions. To actually attain our data, we had to use the selector gadget extension and then use the html functions to create tables and datasets that worked. Some parts of the website were not compatible with the extension which meant that we had to change our initial ideas and adapt to what the extensions were able to get from the website. Fortunately, we had enough data from the individual players and teams that we did not need all the data we originally set out to have. Once we had our data, we worked on cleaning it up because the selector gadget, sometimes, does not give out the cleanest and easiest data to work with. However, by using the janitor library and its functions we were able to make the dataset a lot more accessible and ready to use.

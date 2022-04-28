@@ -227,7 +227,7 @@ three_point_career_leaders <- na.locf(three_point_career_leaders)
 
 # League Graph
 
-```{r}
+```{r, league before after curry graph}
 league_avg_per_game_stats %>% 
   mutate(curry_in_league = if_else(season_start_year >= 2009, TRUE, FALSE)) %>% 
   filter(season_start_year >= 1979) %>% 
@@ -292,7 +292,7 @@ three_player_career_regular_season_per_game %>%
   theme(legend.position = "none")
 ```
 
-```{r}
+```{r, three player 3-pt per season graph}
 three_player_career_regular_season_totals %>% 
   drop_na(season_start_year) %>% 
   ggplot(aes(x = season_start_year,
@@ -328,7 +328,7 @@ three_player_career_regular_season_totals %>%
   theme(legend.position = "none")
 ```
 
-```{r}
+```{r, three player average pts per game per season graph}
 three_player_career_regular_season_per_game %>% 
   drop_na(season_start_year) %>% 
   ggplot(aes(x = season_start_year,
@@ -356,7 +356,7 @@ three_player_career_regular_season_per_game %>%
            size = 3,
            colour = "#1D428A",
            fontface = 4) +
-  labs(title = "Average per Game Points, per Season",
+  labs(title = "Average Points per Game, per Season",
        y = "Points",
        x = "") +
   scale_color_manual(values=c("#FDBB30", "#CE1141", "#1D428A")) + #(Lebron, Jordan, Curry)
@@ -366,7 +366,7 @@ three_player_career_regular_season_per_game %>%
 
 # All-Time Leaders in 3-Pointers
 
-```{r}
+```{r, all time 3-pt leaders graph}
 three_point_career_leaders %>% 
   filter(rank <= 10) %>%
   ggplot(aes(x = x3p,
