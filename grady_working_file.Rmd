@@ -243,7 +243,7 @@ league_avg_per_game_stats %>%
            size = 3,
            label = "Stephen Curry \nDrafted in \n2009",
            fontface = 3) +
-  labs(title = "League Average of 3-Pt Attempts per Game",
+  labs(title = "League Average of 3PT Attempts per Game",
        x = "",
        y = "Attempts per Game") +
   scale_fill_manual(values=c("#17408B", "#C9082A")) +
@@ -293,34 +293,34 @@ three_player_career_regular_season_per_game %>%
 ```
 
 ```{r, three player 3-pt per season graph}
-three_player_career_regular_season_totals %>% 
+three_player_three_point_graph <- three_player_career_regular_season_totals %>% 
   drop_na(season_start_year) %>% 
   ggplot(aes(x = season_start_year,
              y = x3p,
              colour = player)) +
   geom_smooth(se = FALSE) +
   annotate("text",
-           x = 1988,
-           y = 0,
+           x = 1995,
+           y = 200,
            label = "Michael Jordan",
            size = 3,
            colour = "#CE1141",
            fontface = 4) +
   annotate("text",
-           x = 2004,
-           y = 73,
+           x = 1995,
+           y = 250,
            label = "Lebron James",
            size = 3,
            colour = "#FDBB30",
            fontface = 4) +
   annotate("text",
-           x = 2007,
-           y = 160,
+           x = 1995,
+           y = 300,
            label = "Stephen Curry",
            size = 3,
            colour = "#1D428A",
            fontface = 4) +
-  labs(title = "3-Pt Field Goals Made per Season",
+  labs(title = "3PT Field Goals Made per Season",
        y = "",
        x = "") +
   scale_color_manual(values=c("#FDBB30", "#CE1141", "#1D428A")) + #(Lebron, Jordan, Curry)
@@ -329,40 +329,24 @@ three_player_career_regular_season_totals %>%
 ```
 
 ```{r, three player average pts per game per season graph}
-three_player_career_regular_season_per_game %>% 
+three_player_point_graph <- three_player_career_regular_season_per_game %>% 
   drop_na(season_start_year) %>% 
   ggplot(aes(x = season_start_year,
              y = pts,
              colour = player)) +
   geom_smooth(se = FALSE) +
-  annotate("text",
-           x = 1986,
-           y = 25.5,
-           label = "Michael Jordan",
-           size = 3,
-           colour = "#CE1141",
-           fontface = 4) +
-  annotate("text",
-           x = 2004,
-           y = 23,
-           label = "Lebron James",
-           size = 3,
-           colour = "#FDBB30",
-           fontface = 4) +
-  annotate("text",
-           x = 2006,
-           y = 17,
-           label = "Stephen Curry",
-           size = 3,
-           colour = "#1D428A",
-           fontface = 4) +
   labs(title = "Average Points per Game, per Season",
-       y = "Points",
+       y = "",
        x = "") +
   scale_color_manual(values=c("#FDBB30", "#CE1141", "#1D428A")) + #(Lebron, Jordan, Curry)
   theme_tufte() +
   theme(legend.position = "none")
 ```
+
+```{r}
+three_player_three_point_graph + three_player_point_graph
+```
+
 
 # All-Time Leaders in 3-Pointers
 
@@ -377,7 +361,7 @@ three_point_career_leaders %>%
   geom_text(hjust = 1.2,
             fontface = 3,
             size = 3) +
-  labs(title = "Top 10 Career Leaders for 3-Pt Field Goals",
+  labs(title = "Top 10 Career Leaders for 3PT Field Goals",
        x = "",
        y = "") +
   scale_fill_manual(values = c("#E03A3E", 
@@ -392,5 +376,22 @@ three_point_career_leaders %>%
                                "#753BBD")) +
   theme_tufte() +
   theme(legend.position = "none")
+```
+```{r}
+warriors_per_game_stats %>%
+  filter(season_start_year >= 1979) %>%
+  mutate(Curry = season_start_year > 2008) %>%
+  filter(w>40) %>%
+  arrange(w) %>%
+  mutate(season = factor(season, levels=season)) %>%
+  ggplot(aes(x=w, 
+             y=season, fill=Curry)) + 
+  geom_col() + geom_text(aes(label=w),                                                          hjust="right", color = "white") + 
+  theme_tufte() + 
+  labs(title = "Golden State Warriors Highest Wins in a Season", y=NULL, x="Wins") + 
+  scale_fill_manual(values = c("#FFC72C","#1D428A"), 
+                    labels = c("Out of League", "In League"))
+
+
 ```
 

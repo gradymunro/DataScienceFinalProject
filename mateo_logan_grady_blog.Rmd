@@ -167,6 +167,148 @@ three_point_career_leaders <- three_point_career_web %>%
 three_point_career_leaders <- na.locf(three_point_career_leaders)
 ```
 
+```{r, loading in graphs}
+league_avg_3pt_graph <- league_avg_per_game_stats %>% 
+  mutate(curry_in_league = if_else(season_start_year >= 2009, TRUE, FALSE)) %>% 
+  filter(season_start_year >= 1979) %>% 
+  ggplot() +
+  geom_col(aes(x = season,
+               y = x3pa,
+               fill = curry_in_league)) +
+  geom_vline(xintercept = 30.5,
+             linetype = "dashed") +
+  annotate("text",
+           x = 28,
+           y = 33,
+           size = 3,
+           label = "Stephen Curry \nDrafted in \n2009",
+           fontface = 3) +
+  labs(title = "League Average of 3PT Attempts per Game",
+       x = "",
+       y = "Attempts per Game") +
+  scale_fill_manual(values=c("#17408B", "#C9082A")) +
+  theme_tufte() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 90, 
+                                   vjust = 0.5, 
+                                   hjust=1))
+
+
+three_player_three_point_graph <- three_player_career_regular_season_totals %>% 
+  drop_na(season_start_year) %>% 
+  ggplot(aes(x = season_start_year,
+             y = x3p,
+             colour = player)) +
+  geom_smooth(se = FALSE) +
+  annotate("text",
+           x = 1995,
+           y = 200,
+           label = "Michael Jordan",
+           size = 3,
+           colour = "#CE1141",
+           fontface = 4) +
+  annotate("text",
+           x = 1995,
+           y = 250,
+           label = "Lebron James",
+           size = 3,
+           colour = "#FDBB30",
+           fontface = 4) +
+  annotate("text",
+           x = 1995,
+           y = 300,
+           label = "Stephen Curry",
+           size = 3,
+           colour = "#1D428A",
+           fontface = 4) +
+  labs(title = "3PT Field Goals Made per Season",
+       y = "",
+       x = "") +
+  scale_color_manual(values=c("#FDBB30", "#CE1141", "#1D428A")) + #(Lebron, Jordan, Curry)
+  theme_tufte() +
+  theme(legend.position = "none")
+
+
+three_player_point_graph <- three_player_career_regular_season_per_game %>% 
+  drop_na(season_start_year) %>% 
+  ggplot(aes(x = season_start_year,
+             y = pts,
+             colour = player)) +
+  geom_smooth(se = FALSE) +
+  labs(title = "Average Points per Game, per Season",
+       y = "",
+       x = "") +
+  scale_color_manual(values=c("#FDBB30", "#CE1141", "#1D428A")) + #(Lebron, Jordan, Curry)
+  theme_tufte() +
+  theme(legend.position = "none")
+
+
+three_player_comparison_graph <- three_player_three_point_graph + three_player_point_graph
+
+
+three_point_leader_graph <- three_point_career_leaders %>% 
+  filter(rank <= 10) %>%
+  ggplot(aes(x = x3p,
+             y = fct_reorder(player, rank, .desc = TRUE),
+             label = x3p,
+             fill = player)) +
+  geom_col() +
+  geom_text(hjust = 1.2,
+            fontface = 3,
+            size = 3) +
+  labs(title = "Top 10 Career Leaders for 3PT Field Goals",
+       x = "",
+       y = "") +
+  scale_fill_manual(values = c("#E03A3E", 
+                               "#F58426", 
+                               "#CE1141", 
+                               "#00538C", 
+                               "#E03A3E", 
+                               "#007A33", 
+                               "#007A33", 
+                               "#FDBB30", 
+                               "#1D428A", 
+                               "#753BBD")) +
+  theme_tufte() +
+  theme(legend.position = "none")
+
+
+offensive_rating_graph <- league_avg_per_game_stats %>%
+  filter(rk <= 27) %>%
+  ggplot(aes(x=season, y=o_rtg, size=x3pa)) + geom_point() + labs(title = "Average NBA Offensive Rating By Season", size = "3PA Per Game", x=NULL, y="Offensive Rating") + theme_tufte() + theme(legend.background = element_rect(color="black"),                                       axis.text.x = element_text(angle = 90,                                                         vjust = 0.5,                                                        hjust = 1))
+
+
+warriors_season_wins <- warriors_per_game_stats %>%
+  filter(season_start_year >= 1979) %>%
+  mutate(Curry = season_start_year > 2008) %>%
+  filter(w>40) %>%
+  arrange(w) %>%
+  mutate(season = factor(season, levels=season)) %>%
+  ggplot(aes(x=w, 
+             y=season, fill=Curry)) + 
+  geom_col() + geom_text(aes(label=w),                                                          hjust="right", color = "white") + 
+  theme_tufte() + 
+  labs(title = "Golden State Warriors Highest Wins in a Season", y=NULL, x="Wins") + 
+  scale_fill_manual(values = c("#FFC72C","#1D428A"), 
+                    labels = c("Out of League", "In League"))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   We knew that we wanted to do our final project regarding sports. Eventually, we narrowed it down to basketball and, more specifically, we are going to follow Steph Curry’s career and his effect on the league. By looking at the year in which he got drafted in comparison to the league as well as his team’s statistics before and after his draft, we can begin to draw conclusion in regards to his impact. Additionally, we will compare his game statistics to other NBA legends and three point specialists. Through this context, we began to ask ourselves a set of research questions to guide our data collection, wrangling, and visualization.
   To begin with, the overarching question we are asking ourselves is: how did Stephen Curry change the game of basketball in the NBA from his draft in 2009? We will look at three point statistics to dive into this one even more. Additionally, we are asking how did the game during another great’s time, like Michael Jordan, differentiate from the modern game. By looking at their differences in statistics we will be able to come to different conclusions regarding the style of play and the intricacies of what skills the coaches and players are hoping to perfect to be competitive in the league. Finally, we will also compre Lebron James, Michael Jordan and Steph Curry to measure which one was more productive.
 
