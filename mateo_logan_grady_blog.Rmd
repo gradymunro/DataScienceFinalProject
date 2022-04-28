@@ -165,6 +165,16 @@ three_point_career_leaders <- three_point_career_web %>%
   clean_names() 
   
 three_point_career_leaders <- na.locf(three_point_career_leaders)
+
+warriors_stats <- read_html("https://www.basketball-reference.com/teams/GSW/stats_per_game_totals.html") %>% 
+   html_element("#stats") %>% 
+  html_table %>% 
+  clean_names()
+
+warriors_stats <- warriors_stats %>% 
+  clean_names() %>% 
+  discard(~all(is.na(.) | . == "")) %>% 
+  filter(season != "Season")
 ```
 
 ```{r, loading in graphs}
@@ -292,6 +302,26 @@ warriors_season_wins <- warriors_per_game_stats %>%
   scale_fill_manual(values = c("#FFC72C","#1D428A"), 
                     labels = c("Out of League", "In League"))
 
+warriors_3pt_percentage_curry <- warriors_stats %>% 
+  slice(1:25) %>% 
+  ggplot()+
+  geom_col(aes(y = x3p_percent, x = season), fill = "#1D428A")+
+  geom_vline(xintercept = 12.47,
+             linetype = "dashed",
+             size = 1) +
+  annotate("text",
+           x = 10.5,
+           y = 17,
+           size = 3.5,
+           label = "Stephen Curry \nDrafted in \n2009",
+           fontface = 3)+
+  labs(title = "Warriors 3PT Percentage Before And After Curry",
+       y = "",
+       x = "Season")+
+  theme_tufte()+
+  theme(axis.text.x = element_text(angle = 90,
+                                   vjust = 0.5,
+                                   hjust = 1))
 ```
 
 
