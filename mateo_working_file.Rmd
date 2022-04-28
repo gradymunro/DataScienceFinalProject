@@ -3,26 +3,420 @@ title: "Mateo"
 output: html_document
 ---
 
+```{r}
+library(tidyverse)     # for data cleaning and plotting
+library(gardenR)       # for Lisa's garden data
+library(lubridate)     # for date manipulation
+library(openintro)     # for the abbr2state() function
+#library(palmerpenguins)# for Palmer penguin data
+#library(maps)          # for map data
+#library(ggmap)         # for mapping points on maps
+library(gplots)        # for col2hex() function
+#library(RColorBrewer)  # for color palettes
+library(sf)            # for working with spatial data
+#library(leaflet)       # for highly customizable mapping
+library(ggthemes)      # for more themes (including theme_map())
+library(plotly)        # for the ggplotly() - basic interactivity
+library(gganimate)     # for adding animation layers to ggplots
+library(gifski)        # for creating the gif (don't need to load this library every time,but need it installed)
+library(transformr)    # for "tweening" (gganimate)
+library(shiny)         # for creating interactive apps
+library(patchwork)     # for nicely combining ggplot2 graphs  
+#library(gt)            # for creating nice tables
+library(rvest)         # for scraping data
+library(robotstxt)     # for checking if you can scrape data
+library(janitor)       # for cleaning names
+library(reshape2)
+library(zoo)
+library(hablar)
+```
+
+
+```{r}
+Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 2)
+
+```
+
+```{r}
+steph_curry <- read_html("https://www.basketball-reference.com/players/c/curryst01.html")%>%
+  html_element("#per_game") %>% 
+  html_table()
+
+curry_playoffs <- read_html("https://www.basketball-reference.com/players/c/curryst01.html#all_shooting-playoffs_shooting") %>% 
+   html_element("#playoffs_per_game") %>% 
+  html_table %>% 
+  clean_names()
+
+warriors_stats <- read_html("https://www.basketball-reference.com/teams/GSW/stats_per_game_totals.html") %>% 
+   html_element("#stats") %>% 
+  html_table %>% 
+  clean_names()
+
+warriors_stats <- warriors_stats %>% 
+  clean_names() %>% 
+  discard(~all(is.na(.) | . == "")) %>% 
+  filter(season != "Season")
+```
+
+
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+#knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r}
+#devtools::install_github("abresler/nbastatR")
 ```
 
-## Including Plots
+```{r}
+warriors_3pt_percentage_curry <- warriors_stats %>% 
+  slice(1:25) %>% 
+  ggplot()+
+  geom_col(aes(y = x3p_percent, x = season), fill = "#1D428A")+
+  geom_vline(xintercept = 12.47,
+             linetype = "dashed",
+             size = 1) +
+  annotate("text",
+           x = 10.5,
+           y = 17,
+           size = 3.5,
+           label = "Stephen Curry \nDrafted in \n2009",
+           fontface = 3)+
+  labs(title = "Warriors 3PT Percentage Before And After Curry",
+       y = "",
+       x = "Season")+
+  theme_tufte()+
+  theme(axis.text.x = element_text(angle = 90,
+                                   vjust = 0.5,
+                                   hjust = 1))
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+warriors_3pt_percentage_curry
+```
+
+# Pulling in the NBA R Package
+
+```{r}
+#devtools::install_github("abresler/nbastatR")
+#Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 2)
+```
+
+# Sports Reference Data
+
+```{r}
+paths_allowed(paths = "https://www.basketball-reference.com/teams/BOS/stats_per_game_totals.html")
+celtics_web <- read_html("https://www.basketball-reference.com/teams/BOS/stats_per_game_totals.html")
+celtics <- celtics_web %>% 
+  html_element("#stats") %>% 
+  html_table()
+celtics <- celtics %>% 
+  clean_names() %>% 
+  discard(~all(is.na(.) | . =="")) %>% 
+  filter(season != "Season")
+celtics_melted <- celtics %>%
+  melt(id.vars='season') %>% 
+  filter(variable == "w" | variable == "l")
+```
+
+```{r}
+curry_web <- read_html("https://www.basketball-reference.com/players/c/curryst01.html")
+warriors_web <- read_html("https://www.basketball-reference.com/teams/GSW/stats_per_game_totals.html")
+league_web <- read_html("https://www.basketball-reference.com/leagues/NBA_stats_per_game.html")
+lebron_web <- read_html("https://www.basketball-reference.com/players/j/jamesle01.html")
+jordan_web <- read_html("https://www.basketball-reference.com/players/j/jordami01.html")
+three_point_career_web <- read_html("https://www.basketball-reference.com/leaders/fg3_career.html")
+curry_career_regular_season_per_game <- curry_web %>% 
+  html_element("#per_game") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>%
+  mutate(player = "Stephen Curry")
+curry_career_playoffs_per_game <- curry_web %>% 
+  html_element("#div_playoffs_per_game") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>% 
+  mutate(player = "Stephen Curry")
+warriors_per_game_stats <- warriors_web %>% 
+  html_element("#stats") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  discard(~all(is.na(.) | . =="")) %>% #for if there are blank columns
+  filter(season != "Season") %>% #discard the rows where it just has the names
+  retype() %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4)))
+league_avg_per_game_stats <- league_web %>% 
+  html_element("#stats") %>% 
+  html_table %>% 
+  row_to_names(row_number = 1) %>%  
+  clean_names() %>% 
+  discard(~all(is.na(.) | . =="")) %>% #for if there are blank columns
+  filter(season != "Season" & season != "") %>%  #discard the rows where it just has the names
+  retype() %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4)))
+lebron_career_regular_season_per_game <- lebron_web %>% 
+  html_element("#per_game") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  filter(season != "") %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>%
+  mutate(player = "Lebron James") %>% 
+  retype()
+lebron_career_playoffs_per_game <- lebron_web %>% 
+  html_element("#div_playoffs_per_game") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  filter(season != "") %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>% 
+  mutate(player = "Lebron James") %>% 
+  retype()
+jordan_career_regular_season_per_game <- jordan_web %>% 
+  html_element("#per_game") %>% 
+  html_table() %>% 
+  clean_names() %>%
+  filter(lg == "NBA") %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>%
+  mutate(player = "Michael Jordan") %>% 
+  retype()
+jordan_career_playoffs_per_game <- jordan_web %>% 
+  html_element("#div_playoffs_per_game") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  filter(season != "") %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>% 
+  mutate(player = "Michael Jordan") %>% 
+  retype()
+three_player_career_regular_season_per_game <- rbind(curry_career_regular_season_per_game,
+                                                     lebron_career_regular_season_per_game,
+                                                     jordan_career_regular_season_per_game)
+three_player_career_playoffs_per_game <- rbind(curry_career_playoffs_per_game,
+                                               lebron_career_playoffs_per_game,
+                                               jordan_career_playoffs_per_game)
+curry_career_regular_season_totals <- curry_web %>% 
+  html_element("#totals") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  discard(~all(is.na(.) | . =="")) %>%
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>%
+  mutate(player = "Stephen Curry")
+lebron_career_regular_season_totals <- lebron_web %>% 
+  html_element("#totals") %>% 
+  html_table() %>% 
+  clean_names() %>% 
+  discard(~all(is.na(.) | . =="")) %>%
+  filter(season != "") %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>%
+  mutate(player = "Lebron James") %>% 
+  retype()
+jordan_career_regular_season_totals <- jordan_web %>% 
+  html_element("#totals") %>% 
+  html_table() %>% 
+  clean_names() %>%
+  discard(~all(is.na(.) | . =="")) %>%
+  filter(lg == "NBA") %>% 
+  mutate(season_start_year = as.integer(substr(season, 1, 4))) %>%
+  mutate(player = "Michael Jordan") %>% 
+  retype()
+three_player_career_regular_season_totals <- rbind(curry_career_regular_season_totals,
+                                                     lebron_career_regular_season_totals,
+                                                     jordan_career_regular_season_totals)
+three_point_career_leaders <- three_point_career_web %>% 
+  html_element("#nba") %>% 
+  html_table %>%  
+  clean_names() 
+  
+three_point_career_leaders <- na.locf(three_point_career_leaders)
+```
+
+
+
+# Playing with NBA Data
+
+```{r}
+#rosters_2001_2003 <- teams_rosters(seasons = 2001:2003)
+```
+
+```{r}
+#gamedata <- game_logs(seasons = 2020)
+#curry_2020 <- gamedata %>% 
+  #filter(namePlayer == "Stephen Curry")
+```
+
+```{r}
+#assign_nba_players()
+#assign_nba_teams()
+#curry_stats <- df_dict_nba_players %>% 
+  #filter(namePlayer == "Stephen Curry")
+```
+
+# League Graph
+
+```{r}
+league_avg_per_game_stats %>% 
+  mutate(curry_in_league = if_else(season_start_year >= 2009, TRUE, FALSE)) %>% 
+  filter(season_start_year >= 1979) %>% 
+  ggplot() +
+  geom_col(aes(x = season,
+               y = x3pa,
+               fill = curry_in_league)) +
+  geom_vline(xintercept = 30.5,
+             linetype = "dashed") +
+  annotate("text",
+           x = 28,
+           y = 33,
+           size = 3,
+           label = "Stephen Curry \nDrafted in \n2009",
+           fontface = 3) +
+  labs(title = "League Average of 3-Pt Attempts per Game",
+       x = "",
+       y = "Attempts per Game") +
+  scale_fill_manual(values=c("#17408B", "#C9082A")) +
+  theme_tufte() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 90, 
+                                   vjust = 0.5, 
+                                   hjust=1))
+```
+
+# Curry, Jordan, and Lebron Comparison
+
+```{r}
+three_player_career_regular_season_per_game %>% 
+  drop_na(season_start_year) %>% 
+  ggplot(aes(x = season_start_year,
+             y = x3p_percent,
+             colour = player)) +
+  geom_smooth(se = FALSE) +
+  annotate("text",
+           x = 1987,
+           y = 0.15,
+           label = "Michael Jordan",
+           size = 3,
+           colour = "#CE1141",
+           fontface = 4) +
+  annotate("text",
+           x = 2004,
+           y = 0.305,
+           label = "Lebron James",
+           size = 3,
+           colour = "#FDBB30",
+           fontface = 4) +
+  annotate("text",
+           x = 2007,
+           y = 0.43,
+           label = "Stephen Curry",
+           size = 3,
+           colour = "#1D428A",
+           fontface = 4) +
+  labs(title = "Average Per Game 3-Pt Pecentage per Season",
+       y = "3-Pt Percentage",
+       x = "") +
+  scale_color_manual(values=c("#FDBB30", "#CE1141", "#1D428A")) + #(Lebron, Jordan, Curry)
+  theme_tufte() +
+  theme(legend.position = "none")
+```
+
+```{r}
+three_player_career_regular_season_totals %>% 
+  drop_na(season_start_year) %>% 
+  ggplot(aes(x = season_start_year,
+             y = x3p,
+             colour = player)) +
+  geom_smooth(se = FALSE) +
+  annotate("text",
+           x = 1988,
+           y = 0,
+           label = "Michael Jordan",
+           size = 3,
+           colour = "#CE1141",
+           fontface = 4) +
+  annotate("text",
+           x = 2004,
+           y = 73,
+           label = "Lebron James",
+           size = 3,
+           colour = "#FDBB30",
+           fontface = 4) +
+  annotate("text",
+           x = 2007,
+           y = 160,
+           label = "Stephen Curry",
+           size = 3,
+           colour = "#1D428A",
+           fontface = 4) +
+  labs(title = "3-Pt Field Goals Made per Season",
+       y = "",
+       x = "") +
+  scale_color_manual(values=c("#FDBB30", "#CE1141", "#1D428A")) + #(Lebron, Jordan, Curry)
+  theme_tufte() +
+  theme(legend.position = "none")
+```
+
+```{r}
+three_player_career_regular_season_per_game %>% 
+  drop_na(season_start_year) %>% 
+  ggplot(aes(x = season_start_year,
+             y = pts,
+             colour = player)) +
+  geom_smooth(se = FALSE) +
+  annotate("text",
+           x = 1986,
+           y = 25.5,
+           label = "Michael Jordan",
+           size = 3,
+           colour = "#CE1141",
+           fontface = 4) +
+  annotate("text",
+           x = 2004,
+           y = 23,
+           label = "Lebron James",
+           size = 3,
+           colour = "#FDBB30",
+           fontface = 4) +
+  annotate("text",
+           x = 2006,
+           y = 17,
+           label = "Stephen Curry",
+           size = 3,
+           colour = "#1D428A",
+           fontface = 4) +
+  labs(title = "Average per Game Points, per Season",
+       y = "Points",
+       x = "") +
+  scale_color_manual(values=c("#FDBB30", "#CE1141", "#1D428A")) + #(Lebron, Jordan, Curry)
+  theme_tufte() +
+  theme(legend.position = "none")
+```
+
+# All-Time Leaders in 3-Pointers
+
+```{r}
+three_point_career_leaders %>% 
+  filter(rank <= 10) %>%
+  ggplot(aes(x = x3p,
+             y = fct_reorder(player, rank, .desc = TRUE),
+             label = x3p,
+             fill = player)) +
+  geom_col() +
+  geom_text(hjust = 1.2,
+            fontface = 3,
+            size = 3) +
+  labs(title = "Top 10 Career Leaders for 3-Pt Field Goals",
+       x = "",
+       y = "") +
+  scale_fill_manual(values = c("#E03A3E", 
+                               "#F58426", 
+                               "#CE1141", 
+                               "#00538C", 
+                               "#E03A3E", 
+                               "#007A33", 
+                               "#007A33", 
+                               "#FDBB30", 
+                               "#1D428A", 
+                               "#753BBD")) +
+  theme_tufte() +
+  theme(legend.position = "none")
+```
