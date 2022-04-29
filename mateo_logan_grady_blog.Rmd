@@ -11,7 +11,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-#knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE)
+knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE)
 ```
 
 ```{r, libraries}
@@ -378,4 +378,4 @@ offensive_rating_graph
 
 # Conclusion
 
-
+  Our analysis of Curry shows that he truly is a generational player that changed the game of basketball. Curry’s individual scoring statistics in his peak are right on par with the two greatest players of all time. Curry has also made more three-point shots than any other player in NBA history, and he is only 33 years old, meaning he still has more years left in his career. Curry breaking this record at such a young age shows he is like no other player before him in NBA history, and it can be seen since he reached his peak that he has changed the game of basketball league-wide. Since he entered the league, there has been a significant increase in three-point shots attempted per game. According to the average offensive rating across the league, this increase in three-point shots attempted has led to an all-time high in the offensive rating, which shows that this change in the game has led to a more efficient offensive style of basketball. This new style of basketball also leads to team success, as we can see that as Curry entered the league, the Warriors' increase in three-point efficiency led Curry to be part of some of the winningest Warriors teams in team history. Overall, our analysis of Curry was successful in showing that he is an all-time great player that has had an unmatched impact on his team and the game of basketball as a whole.
