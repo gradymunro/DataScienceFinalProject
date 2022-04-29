@@ -336,16 +336,46 @@ warriors_3pt_percentage_curry <- warriors_stats %>%
 
 # Curry Individual Play
 
+  We want to start off with: How does Stephen Curry compare to the two greatest basketball players of all time? We will compare these three players using two statistics, their three-pointers made per season, and their average points per game, per season. When looking at three-pointers, it’s not even close. The graph on the left shows the differences in playstyle between the three players. Michael Jordan did not incorporate three-pointers into his game, and it shows, with his best season for this metric not even reaching 100. Lebron James has a more varied playstyle and has incorporated more three-pointers in recent years. Curry is clearly unmatched when it comes to three-pointers, but how about points in general? The graph on the right shows how the three players compare with average points per game. This is where things even out, and we see just how dominant Jordan was. Jordan by far had the highest average points per game, but he saw a sharp decline towards the end of his career. Lebron has had some ups and downs over his career, but he consistently averages between 25 and 30 points per game. Curry falls lowest on this graph, but he clearly has the sharpest takeoff. Curry skyrocketed from the start of his career to match Lebron. He tracks slightly below, but not by much. Both Curry and Lebron look to be on the rise, and it will be interesting to see how they perform in the future. Overall, Curry is comparable to the two greats in these two measures, however, a more holistic analysis would be needed to truly say whether he truly matches up to them. 
+  
+```{r}
+three_player_comparison_graph
+```
+
+  As a short addition to our comparison, we will move into a comparison across three-point shooters over the course of the league. Stephen Curry is clearly the greatest three-point shooter of all time. He holds the record for most career three-pointers, and he also holds the record for most three-pointers in a single season. Looking at the graph below, Ray Allen was a hall of fame player who no one thought could be beaten. However, Curry has smashed that record and has the potential to build such a lead that no one could catch him. Again, Curry is the greatest three-point shooter the league has ever seen, and he will likely be the best for many years to come.
+
+```{r}
+three_point_leader_graph
+```
+
 # Warriors
 
   We have seen how Curry matches up with two NBA legends: Lebron James and Michael Jordan. After showing that he matches up, individually, with two of the NBA’s best players, we also wanted to look at what impact Curry has had on the Warriors since he has played for them. Individual accolades are one thing, but making your team better through your style of play is what really makes a player one of the all-time bests. The best way to measure a player’s impact is to measure what basketball is all about: wins. We took all of the Warriors seasons since the three point line had been installed in the NBA and examined how many of the top seasons in the Warriors franchise have been with Curry-led Warrior’s teams. As we can see, Curry has been a part of the top 5 winningest teams of the Warriors and has been a part of 8 of the top 16 winningest teams. This proves that the style of basketball that Curry has ushered into the NBA is a successful winning style.
- 
+
+```{r}
+warriors_season_wins
+```
+  
   Additionally, by looking at the Warriors' three-point percentage average per season, we can see a trend in the team’s three-point percentage. As soon as Curry got drafted, the percentage increased significantly. There are a lot of factors that could go into this; however, it is important to note that Curry’s influence was a major factor in this trend. For example, having such a good shooter in your team will motivate other teammates to improve their own skills, and if the coach decides to build the team around Curry and other shooters, the team will completely switch to a shooting team. In the Warriors' case, this is exactly what happened. Steve Kerr, their coach, turned the team into a shooting team that dominated the NBA through Curry and Klay Thompson's three-pointers. Although we cannot say that Curry was the only factor that led to these statistics, we can say that Curry changed the game on a grand scale and had something to do with this. 
   
+```{r}
+warriors_3pt_percentage_curry
+```
+
 # League (NBA)
 
   We will start off by looking at the league’s average three-point attempts per game through different seasons before and after Curry got drafted. This graph visualizes the fact that three-point attempts had been gradually increasing throughout time; nonetheless, once Curry got drafted in 2009 the attempts of three-point attempts seemed to exponentially increase. This first observation helps us make the claim that Curry began to change the style of play in the NBA. Before, the game did not revolve so much around three-pointers and sharpshooters; however, once he began playing with his style of shooting, it impacted the league substantially. The increase in three-point attempts can be ascribed to the fact that coaches saw the potential in shooting, so their scouts made it clear that shooting was necessary for recruits. Furthermore, kids and teenagers that grew up with Curry’s shooting now will be motivated to imitate him and, subsequently, bring three-point shooting into the league. Through the coaches/staff and his influence on people watching him, Curry was able to change the style of play in the NBA to one that prioritizes shooting and three-pointers. 
-  
+
+```{r}
+league_avg_3pt_graph
+```
+
   As we know, Stephen Curry’s three-point sharpshooting and floor spacing led to a significant increase in three-point attempts throughout the entire league. This new style of basketball that Curry and the Warriors adapted with a high volume of three-pointers led to a refreshing and enjoyable new game starting to be played. As refreshing and exciting as this style of play was to watch, we want to see if this new style of play actually led to a better and more efficient offense. We use the statistic of the average NBA offensive rating to help measure the effectiveness of NBA offense from season to season. The offensive rating statistic is the average points an NBA team scores per 100 possessions, this way, the statistic is consistent and does not take into account changes in pace across eras of the NBA and differing amount of average possessions per game. We compare the NBA offensive ratings across 26 seasons with Curry’s rookie season as a median point. As the graph shows, as Curry entered the league, there was a steady increase in three-point shots attempted per game, and the offensive rating stayed in a similar range, even showing a slight decrease. As Curry becomes more popular and the Warriors become more successful (the 2013-2016 range), the three-point attempts increase even more into the 30s per game, and the average offensive rating also increases along with it to all-time highs from 2017-present. When the average three-point attempts per game first started to increase, the efficiency might not have increased with it or matched the attempts, but as three-point shooting became more essential to all players, players began to specialize in it, and coaches began to use it to increase their offensive efficiency, as we can now see an upward trend in the data.
+
+```{r}
+offensive_rating_graph
+```
+
+# Conclusion
 
 
